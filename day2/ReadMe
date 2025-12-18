@@ -1,0 +1,3 @@
+let and const are hoisted, but they stay in the Temporal Dead Zone (TDZ) and cannot be accessed until they are initialized.
+var declarations are hoisted and initialized with undefined during the hoisting phase.
+A closure allows an inner function to capture and retain access to variables from its outer scope, effectively creating private state.
