@@ -1,0 +1,4 @@
+what is callback in myMap function ? Functions passed as parameters, myMap reponsible for running the loop, but what it does with the numbers in the array is determined by the passed-in callback.
+Why pass a function in? Passing in a function is to increase flexibility.
+Why do we need to create a new one for output? Maintain the immutability of the original data.
+This myMap function takes an array and applies a callback to each element, returning a new array.
