@@ -1,0 +1,5 @@
+isAdult` should belong to user ? why? 
+    yap becuae It only depends on user.age and which describes the user's own state, no external resources (DB/API) are required.
+Which logic "should not" be placed in this object? 
+    An object should only contain the behavior it is responsible for, not process control.
+
