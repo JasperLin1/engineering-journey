@@ -1,0 +1,16 @@
+What are the three states of a Promise?
+    (Pending) This means that asynchronous operations (such as setTimeout) are still in progress and have not yet produced a result.
+    (Fulfilled) This indicates that the operation has completed successfully. At this point, the `.then()` function will be triggered.
+    (Rejected)  This indicates that an error has occurred or the operation has been blocked. In this case, the `.catch()` function will be triggered.
+What do `resolve` and `reject` do?
+    resolve(value): Its task is to change the state of a Promise from Pending to Fulfilled. It passes the result (e.g., "wait 1000 milliseconds") Pass it out to .then() for use.
+
+    reject(error): Its task is to change the Promise's state from Pending to Rejected. It passes an error message or Error object to .catch() to notify the program that "something wrong".
+Why return a new Promise?
+    This is to allow the wait function to be "waited for".
+What is await waiting for?
+    Waiting for the "state change" of the Promise object. to decide return the value of resolve or rejected.
+Why must it be wrapped in try/catch?
+    Because await can not directly handle wrong message.
+What does an async function return?
+    async function always return a Promise object
