@@ -1,0 +1,6 @@
+What are the risks of this function?
+    It may produce invalid results, but it will not report an error.
+Would you handle the error here, or pass it to the caller?
+    Letting this function have a ability to handle error by itself.
+Why?
+    Because the function's responsibility is to "return a reliable result or a clear failure".
