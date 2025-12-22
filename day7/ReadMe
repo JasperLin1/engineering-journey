@@ -1,0 +1,2 @@
+Because "c" is a call stack(synchronous), and then print "B" is a Microtask Queue(oromise.then /await), "A" is a Macrotask Queue(setTimeout/setInterval)
+In each round of the event loop: microtasks must be cleared before macrotasks can be executed.
