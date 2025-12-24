@@ -25,5 +25,3 @@ async function bar() {
 
 foo();
 bar();
-
-//add practice asynchronous design exercise
