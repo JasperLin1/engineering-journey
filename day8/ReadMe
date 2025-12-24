@@ -1,0 +1,12 @@
+I learned
+Fake API
+Simulate failures/retries
+Design asynchronous functions properly
+No more abuse of await
+
+what's the ex1 output oder and why?
+    "1" "2" "3", First call foo is synchronus that print "1" and bar() is asynchronous, but it does not have await. So execute bar, however print "2". Next even Promise has been resoled, await still put "3" in microtask Queue, so "3" wouldn't be print immediately. Finall step, after call stack be cleared that microtask running and print "3'.
+    The key point here, Even if a Promise is already resolved, await always breaks the synchronous execution flow
+what's the ex2 output oder and why "2" wouldn't be block by await?
+    "1" "2" "3", First call foo is synchronus that print "1" and encounter await Promise.resolve(). Even Promise has been resoled that "3" will be put in microtask Queue. Next bar() print "2" not await, so end. Finall step, after call stack be cleared that microtask Queue running and print "3'.
+    The key point here is await will only pause the currently asynchronous function and will not block other synchronous functions.
