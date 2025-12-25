@@ -10,6 +10,6 @@ what's the letter a and b mean in ex1?
 what's x in ex2 ?
     x is promise that it's the same reasson with last question latter a.
 why is it necessary to use .then()?
-    the function of .then() that it's same with await.
+    the function of .then() that it's same with `await`.
 what's v ?
     v is a value after promise resolved. So v equal "hello".
