@@ -1,0 +1,15 @@
+I learned 
+When to use `await` and when not to use it?
+How to design reusable asynchronous functions?
+How to handle failures (retries/rollbacks)?
+How to write asynchronous functions in real-world projects?
+
+what's the letter a and b mean in ex1?
+    a is promise, because asynchronous functions always return a Promise. And b is 42, because `await` will wait promise resolved and then to get value of resolved.
+    The key point here is that When you call a asynchronous function, you will always get a Promise object. Unless you use `await` to wait for it.
+what's x in ex2 ?
+    x is promise that it's the same reasson with last question latter a.
+why is it necessary to use .then()?
+    the function of .then() that it's same with await.
+what's v ?
+    v is a value after promise resolved. So v equal "hello".
