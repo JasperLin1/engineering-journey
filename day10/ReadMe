@@ -1,0 +1,2 @@
+ex1 is sequence await, so it's totally waiting fot 2 second. This is bad way, because a and b are different things. they can run at the same time. And just spend 1 second to run a and b.
+parallel execution: start asynchronous tasks first, then await them. 
