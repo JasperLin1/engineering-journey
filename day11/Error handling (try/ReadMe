@@ -1,0 +1,21 @@
+Task1: "after" will be printed ? "after" wouldn't be printed, When `await` encounters a rejected Promise, it is equivalent to throwing an error.  Once throw happen,all subsequent code will be interrupted, and the program will jump directly to the catch block.
+        Why can `catch` catch errors? Because await will convert a rejected Promise into an error, and try/catch can catch the error.
+        key point: await + rejected Promise = throw error.
+
+Task2:  Where did this error message go? The error message changed to "Unprocessed rejected Promise", but no one responded.
+
+        Why am I seeing a warning in Node/browser? If an asynchronous function encounters an error but it is not caught, the program will not crash immediately, but will leave an unhandled rejection message.
+
+Task3:  A, B, and C, which one will actually be executed? Those all latter will be executed. because promise.all let them runing at the same time.
+
+        When will `Promise.all` be rejected? Only one of them be rejected. Promise.all will be rejected immediaately.
+
+        Will `C` be executed? yes, Promise.all starts all promises immediately, rejects on the first failure, and ignores the rest of the results. 
+
+Task4:  When to retry？ 1.Network error (timeout, request failed).
+                        2.API error code 500 / 503.
+                        3.Third-party service temporarily unavailable.
+                        key point: This isn't my fault; it's due to environmental instability. → can retry.
+        When to give up？   1.Exceeded the maximum number of times → For example, try 3 times and then stop.
+                            2.Wrong type is not worth retrying → For example, validation erro.
+                            3.The cost is too high → For example, long waiting time/poor user experience.
