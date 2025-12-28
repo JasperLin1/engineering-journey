@@ -1,0 +1,9 @@
+Part2: what's the output order? A D F C E B, because The synchronizing process finishes running first, then executes all microtasks (Promise/await), and finally processes the macrotask (setTimeout).
+
+Part3: The await method will truncate the following code into Promise.then.Therefore, the code following `await` will definitely be added to the microtask queue.
+
+Part5:  what's defferent between A and B? A is sequential, B is parellal
+
+        When to use A? When there are dependencies between tasks, use option A.
+
+        When to use B? Use option B when tasks are independent of each other. B is usually more efficient But if they fail, they will all refuse.
