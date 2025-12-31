@@ -1,0 +1,2 @@
+The key of object just only can store string and symbol, so it's not very convenient rether than using new Map. This can store number, object and function so on.
+In this programming after counter Map, i used sortArary to sort the result, but Map is not like a array can be count. So i Convert the Map to an array and sort it by key (userId). And Switch back to map mode: This will preserve your sorting order. 
