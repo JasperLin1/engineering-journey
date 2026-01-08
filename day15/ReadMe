@@ -1,0 +1,13 @@
+【synchronous Stack】
+A
+E
+G
+await will not block synchronous programs.
+
+【Microtask Queue】
+C
+F
+
+【Macrotask Queue】
+B
+D
