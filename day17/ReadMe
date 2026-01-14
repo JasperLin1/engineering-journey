@@ -1,0 +1,21 @@
+❗ Problems
+
+If the same user calls the API 100 times per second, how to deal with?
+
+User A: 100 hits per second
+
+User B: Normal usage
+
+If you block all attacks → terrible UX
+
+If you accept all attacks → server crash
+
+👉 Solution: Each user queues up individually
+
+Rate limits are applied to a single user. If a queue is shared, a large number of requests from one user will block other users. Using a separate queue for each user can achieve traffic isolation and ensure that they do not affect each other.
+
+1️⃣ What does this module do? 👉 This module manages and limits the number of concurrent asynchronous tasks per user. It uses a queuing system to control request execution order and concurrency levels.
+
+2️⃣ What practical problem does it solve? 👉 It prevents individual users from overwhelming the system with too many requests, which ensures system resources remain available for everyone and maintains overall stability.
+
+3️⃣ Why not just use a single shared queue? 👉 Using a single queue would allow one heavy user to bottleneck the entire system. By implementing per-user queues, we achieve traffic isolation, ensuring that one user’s high volume of requests doesn't affect the performance of others.
