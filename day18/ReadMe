@@ -1,0 +1,34 @@
+UserTaskLimiter responsible for managing all user queue.
+Control the number of tasks that each user can perform simultaneously.
+Ensure that users do not interfere with each other.
+
+UserTaskLimiter
+│
+├── Map<userId, queue>
+│        │
+│        ├── tasks: []
+│        ├── running: 0
+│
+├── addTask()   → add task to user queue
+├── _runNext()  → Controling how many task can run at the same time
+└── _getUserQueue() → managing queue
+
+I still leared Load balancer, Redis theory of system design. In this case, i can use Users → LB → Servers → Redis (shared queue) → Database
+Benifit is All servers share the queue, No fear of server crashes and scalable
+
+
+If server open more and more that need to protect database to be Bottleneck.
+Option 1: Cache (Redis)
+            Server → Redis → Database
+Comment:    Many requests do not require access to the database.
+
+Option 2: Read Replica(read offload)
+            Write DB (main)
+            Read DB (copy x N)
+
+Option 3: Sharding
+            User 1~1M → DB1
+            User 1M~2M → DB2
+
+Option 4: queue(Peak clipping)
+            Request → Queue → DB
