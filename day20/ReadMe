@@ -1,0 +1,22 @@
+Implement a scheduler:
+
+limit = 2
+
+Tasks exceeding this limit will be queued.
+
+Tasks are asynchronous functions.
+
+runNext do
+If running >= limit → return
+
+If queue is empty → return
+
+Retrieve a task from queue
+
+running++
+
+Execute task()
+
+After task finishes → running--
+
+Call runNext()
