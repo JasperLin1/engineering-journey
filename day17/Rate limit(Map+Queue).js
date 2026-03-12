@@ -45,3 +45,8 @@ class RequestQueue {
     }
   }
 }
+// This will trigger the constructor, which will receive the number 2 as an argument.
+const myQueue = new RequestQueue(2); 
+
+console.log(myQueue.concurrency); // 輸出 2
+console.log(myQueue.running);     // 輸出 0

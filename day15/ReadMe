@@ -7,6 +7,7 @@ await will not block synchronous programs.
 【Microtask Queue】
 C
 F
+The same event loop will clear all microtasks.
 
 【Macrotask Queue】
 B
