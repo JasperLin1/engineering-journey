@@ -31,3 +31,23 @@ exports.me = async (req, res) => {
   if (!user) return res.status(404).json({ message: "not found" });
   res.json({ user: { id: user._id, email: user.email } });
 };
+
+exports.updateName = async (req, res) =>{
+
+  const { name } = req.body;
+
+  if(!name || name.length < 2){
+    return res.status(400).json({
+      message: "Name muse be at least 2 characters"
+    });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user.id,
+    { name},
+    { new: true }
+  );
+
+  res.josn(user);
+
+};

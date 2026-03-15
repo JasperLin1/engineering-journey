@@ -6,5 +6,6 @@ const ctrl = require("../controllers/authController");
 router.post("/register", ctrl.register);
 router.post("/login", ctrl.login);
 router.get("/me", auth, ctrl.me);
+router.patch("/update-name" , auth, ctrl.updateName);
 
 module.exports = router;
