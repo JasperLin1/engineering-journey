@@ -60,7 +60,7 @@ const message = await Message.find({
 .sort({ createdAt: -1 })
 .limit(50);
 
-/* like whatApp,Discord,Slack to 
+/* like whatApp,Discord,Slack
 
 All of them are:
 pagination
