@@ -45,3 +45,28 @@ Slow network transfer speed
 Server → Client transfer speed:
 100MB
 */
+
+
+/* Solution is Pagination
+
+For example:
+ only take the latest 50 records.
+
+ */
+// code become:
+const message = await Message.find({
+  conversationId: req.params.id
+})
+.sort({ createdAt: -1 })
+.limit(50);
+
+/* like whatApp,Discord,Slack to 
+
+All of them are:
+pagination
+
+They won't capture all at once.
+
+*/
+
+
