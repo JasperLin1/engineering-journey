@@ -1,0 +1,32 @@
+Client-Server Architecture(客⼾端-伺服器架構)
+核⼼概念:
+    Client（客⼾端）：發起請求的⼀⽅。例如瀏覽器、⼿機 App、或另⼀個服務。
+    Server（伺服器）：接收請求、處理邏輯、回傳結果的一方。
+    兩者透過網路溝通，遵循 Request-Response（請求-回應） 模型：客⼾端發送請求，伺服器處理後回傳回應。
+
+    Client-Server 是理解系統設計的起點:
+    1. 職責分離：Client 負責展⽰和互動，Server 負責商業邏輯和資料處理。這種分離讓系統更容易維護和擴展。
+    2. 集中管理：資料和邏輯集中在 Server 端，⽅便更新、維護和安全管控。Client 不需要知道資料怎麼存、邏輯怎麼跑。
+    3. 多客⼾端⽀援：同⼀個 Server 可以同時服務網⾴、⼿機 App、第三⽅ API 等不同類型的 Client。
+    4. 擴展基礎：當流量增加時，我們可以對 Server 做垂直或⽔平擴展（⾒scalability.md ），⽽不需要改動 Client。
+
+Thin Client vs Thick Client:(Client 可以承擔不同程度的邏輯處理)
+    Thin Client（瘦客⼾端）：⼤部分邏輯在 Server 端，Client 只負責顯⽰。
+    ⼤部分邏輯在 Server 端，Client 只負責顯⽰。
+    傳統的伺服器端渲染網⾴（Server-Side Rendering），Server 產⽣完整的HTML，瀏覽器只負責渲染。
+    優點：Client 輕量、易維護、安全性⾼（邏輯不暴露在前端）。
+    缺點：每次互動都需要向 Server 請求，使⽤者體驗可能較慢。
+
+    Thick Client（胖客⼾端）：Client 端承擔較多邏輯，Server 主要提供資料。
+    React / Vue 等 SPA（Single Page Application），前端處理路由、狀態管理、UI 邏輯，只向 Server 請求資料(API)。
+    優點：使⽤者體驗流暢，減少 Server 負擔。
+    缺點：前端程式碼複雜，部分邏輯暴露在 Client 端。
+
+
+Client-Server vs Peer-to-Peer(P2P)
+    並非所有系統都使⽤ Client-Server 架構。另⼀種模型是 Peer-to-Peer (P2P，點對點)：
+    通訊⽅式: 節點之間直接溝通
+    集中控制(無): 去中⼼化）
+    擴展⽅式: 加入更多 Peer
+    典型應⽤: 視訊通話（WebRTC）、檔案分享（BitTorrent）
+    
