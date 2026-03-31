@@ -1,0 +1,99 @@
+GraphQL
+    GraphQL 是由 Facebook 提出的 API 查詢語⾔ 以及 執⾏環境。
+    核⼼理念是：客⼾端決定需要什麼資料，伺服器只回應請求的欄位。
+    與 REST 以「資源導向」設計不同，GraphQL 以「查詢導向」設計：
+    REST：⼀次 API call 對應⼀個資源
+    GraphQL：⼀次查詢可以跨多個資源，組合出所需的資料
+
+核⼼特徵
+    單⼀端點 (Single Endpoint)
+        REST 通常有多個 URI，例如 /users/123 、 /orders/456
+        GraphQL 通常只⽤⼀個端點 /graphql ，所有操作都透過這個端點
+    精準查詢 (Client-driven query)
+        客⼾端決定要哪些欄位
+        伺服器回傳精確對應的資料 → 避免 REST 的 over-fetching / under-fetching
+    強型別 (Strongly Typed Schema)
+        Schema 定義所有可⽤的型別、欄位與關聯
+        ⾃帶⽂件與型別檢查，開發體驗好
+    單⼀請求跨多資源 (Nested Queries)
+        可以⼀次查詢多個相關資源，例如「查詢使⽤者同時抓訂單清單」
+        REST 可能需要多次 API call
+
+GraphQL ⽀援三種操作
+    Query → 讀取資料
+        查詢會拿到「ID 為 123 的 user」，並同時取得該使⽤者的 name、email，以及所有訂單的 id 和總額。
+    Mutation → 修改資料 (新增、更新、刪除)
+        mutation 會建立⼀個新使⽤者，伺服器回傳新建立的使⽤者 ID 與姓名。
+    Subscription → 即時資料推送類似 WebSocket 或 SSE（Server-SentEvents
+        subscription 會訂閱「新訂單事件」，當有新訂單建立時，伺服器會主動推送訂單 id 與總額。
+
+回傳格式
+伺服器回應通常是 JSON，結構與查詢相同。
+
+
+優缺點
+優點：
+    客⼾端控制所需資料 → 避免 over-fetching / under-fetching
+    Schema 強型別 → ⽂件與型別檢查⾃動化
+    ⼀次請求可跨多資源 → 減少 API call
+缺點：
+    伺服器端實作較複雜（需要 resolver 與 schema 管理）
+    要維護⼀個完整的強型別 schema，並確保前後端⼀致。
+    每個 field 都需要 resolver，容易導致 N+1 問題，必須做 batching/caching。 
+    ******
+    Query 是 client-driven，可能產⽣⾼複雜度或惡意查詢，因此需要 query complexity 限制與額外安全控管。
+    Query 過於靈活，可能導致效能瓶頸（深層巢狀查詢、N+1 問題）
+    在 GraphQL 裡，因為 resolver 是 field-based 的設計，巢狀查詢很容易造成
+    N+1 問題。例如查詢⼀組使⽤者與各⾃的訂單時，可能會變成先查⼀次
+    users，再對每個 user 各查⼀次 orders。這樣會導致資料庫負擔過⼤。
+    解法通常是透過 DataLoader 或類似的 batch loading 技術，把多個查詢合併
+    成⼀個 IN 查詢，或者在 resolver 層就設計成 join / aggregation，⼀次把資料抓回來。
+    Cache 機制不如 REST → 通常需要 Apollo、Relay 等額外⼯具
+    REST 的快取相對簡單，因為⼀個資源對應固定 URL，可以直接利⽤瀏覽器、
+    CDN 的 HTTP caching。但 GraphQL 所有查詢都走同⼀個 endpoint，不同
+    query body 會產⽣不同結果，導致無法⽤ URL 當快取 key。所以 GraphQL
+    需要額外機制，例如 persisted queries 或 Apollo/Relay 的客⼾端快取，來模
+    擬類似 REST 的快取能⼒。
+
+
+RPC (Remote Procedure Call)
+    RPC（Remote Procedure Call）是⼀種通訊模型，允許⼀個程式呼叫遠端伺服器上的函式，就像呼叫本地函式⼀樣。
+    核⼼理念是：隱藏網路細節，讓遠端⽅法呼叫看起來像本地呼叫。
+    在 REST 是「資源導向」、GraphQL 是「查詢導向」，RPC 則是「⽅法導向」，強調直接呼叫⼀個函式或服務。
+
+核⼼特徵
+    ⽅法導向 (Method-oriented)
+        API 介⾯通常以「動作」為中⼼，例如： CreateUser() 、 GetUser()
+        呼叫形式就像 function call，⽽不是透過 URI 找資源
+    跨語⾔協定⽀援
+        常⾒的 RPC 框架（gRPC、Thrift、Avro）會透過 IDL（Interface Definition Language）定義介⾯
+        ⽣成 stub / client library，讓不同語⾔的程式能互相呼叫
+    ⾼效序列化格式
+        常⽤⼆進位格式（Protobuf、Thrift、Avro）取代 JSON → 傳輸更快、更省流量
+    雙向串流 (Bidirectional Streaming)
+        以 gRPC 為例，⽀援 client-streaming、server-streaming、雙向 streaming
+        適合即時通訊或⼤流量資料交換
+
+常⾒操作
+以 gRPC 為例，通常會：
+1. 定義介⾯ (IDL)
+2. 產⽣ Client/Server Stub
+    Client 呼叫 GetUser() → 底層⾃動轉換成網路請求
+3. 呼叫⽅式（程式看起來像本地函式）：
+    對使⽤者來說，它就像呼叫⼀個函式，但實際上 request/response 是透過網路傳輸。
+
+優缺點
+    優點：
+        呼叫直觀：對開發者來說像在呼叫本地函式
+        效能⾼：⼆進位序列化（Protobuf）比 JSON 更快更省
+        強型別：IDL 提供清晰的契約，跨語⾔兼容
+        ⽀援串流：適合 real-time 應⽤
+    缺點：
+        耦合度⾼：Client/Server 都依賴相同的介⾯定義，版本管理困難
+        不如 REST 通⽤：需要事先⽣成 stub，無法像 REST ⼀樣直接⽤ curl 測試
+        Debug/可觀察性較差：封包是⼆進位，不像 JSON 易讀
+        對外部開放性較差：更適合內部微服務之間的通訊，⽽不是公開 API
+
+典型使⽤場景：
+    微服務之間的內部通訊 → 常⽤ gRPC
+    需要⾼效能、低延遲、⼤量呼叫的場景
