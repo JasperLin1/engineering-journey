@@ -1,0 +1,66 @@
+API Security
+Authentication and Authorization
+    Authentication（⾝份驗證）
+        問題：你是誰？
+        ⽬的：確認使⽤者或服務的⾝份是否合法。
+        範例：輸入帳號密碼登入、⽤ API key 或 Token 驗證服務呼叫⽅。
+    Authorization（授權）
+        問題：你能做什麼？
+        ⽬的：決定已驗證⾝份的使⽤者是否有權限執⾏某個操作或存取某個資源。
+        範例：
+        Admin 可以 DELETE /users/123
+        普通使⽤者只能 GET /users/123 查看⾃⼰的資料。
+
+簡單記法：
+Authentication = Who you are
+Authorization = What you can do
+
+常⾒ Authentication ⽅式:
+API Key
+    最簡單⽅式 → 在 header 帶⼀組 key
+    缺點：key 洩漏風險⾼，缺乏細粒度權限控制
+Basic Auth
+    ⽤ username:password 做 Base64 編碼放在 header
+    適合簡單情境，但安全性差
+
+Token-based (Session Token / JWT)
+    使⽤者登入後由伺服器發 token，之後呼叫 API 時帶上 token
+    JWT (JSON Web Token) 常⽤ → 常⽤做 Access Token，內含使⽤者資訊與
+    簽章，可 stateless 驗證
+    Access Token：短期有效，通常幾分鐘到幾⼩時，⽤於每次 API 呼叫驗證
+    No reformatting changes were needed.
+    Refresh Token：長期有效，當 Access Token 過期時可⽤來取得新的 Access
+    Token
+    Expire Time：Access Token 通常會有明確到期時間，避免被盜⽤長期有效
+OAuth 2.0
+    常⽤於第三⽅ API 授權（Google, Facebook, GitHub 登入）
+    流程：使⽤者同意授權 → 發送 access token → API ⽤ token 驗證
+    mTLS (Mutual TLS)
+    雙⽅都要出⽰憑證
+    常⽤於內部微服務之間的
+
+常⾒ Authorization 模型（含例⼦）
+    RBAC (Role-Based Access Control)
+        概念：根據使⽤者⾓⾊來控制權限
+        例⼦：
+        Admin → 可以 GET /users 、 DELETE /users/123
+        Editor → 可以 POST /articles 、 PUT /articles/456
+        Viewer → 只能 GET /articles/456
+        應⽤場景：公司內部管理系統（不同⾓⾊對應不同職能）
+    ABAC (Attribute-Based Access Control)
+        概念：根據使⽤者或資源的屬性（屬性可以是時間、地點、部⾨等）來決定是
+        否允許存取
+        例⼦：
+        使⽤者屬性：部⾨ = HR → 可以存取 /payroll
+        buildmoat.org
+        環境屬性：只有在辦公室 IP 網段才能呼叫 /internal-api
+        資源屬性：⽂件標記為「Confidential」，只有 clearance 等級 ≥ 3 的⼈可
+        以讀取
+        應⽤場景：⾦融機構、政府系統，需要更細緻的存取控制
+    Scope-based (OAuth Scopes)
+        概念：權限隨 Token 的 scope ⼀起發放
+        例⼦（GitHub API）：
+        Token scope = repo → 可以存取私⼈ repo
+        Token scope = read:user → 只能讀取使⽤者基本資訊
+        Token scope = write:org → 可以修改組織資訊
+        應⽤場景：第三⽅應⽤授權 (Google Drive、Github API)
