@@ -1,0 +1,100 @@
+Transaction（交易） 要解決的問題：把⼀組相關的資料庫操作包成⼀個邏輯單元，保證它們作為⼀個整體被執⾏。
+Transaction 保證操作要麼全部成功，要麼全部失敗，絕對不會停在「成功一半」的尷尬狀態。
+ACID：四個保證
+    這四個屬性定義了「⼀個真正可靠的 transaction」長什麼樣
+
+    Atomicity（原⼦性）
+        原⼦性保證：⼀個 transaction 內的所有操作，要麼全部成功，要麼全部失敗。不存
+        在中間狀態。
+
+    Consistency（⼀致性）
+        ⼀致性保證：Transaction 執⾏完後，資料庫必須從⼀個合法狀態轉移到另⼀個合法狀態。
+        交易前後，資料必須符合規則（例如：餘額不能為負數）。
+
+    Isolation（隔離性）
+        隔離性保證：同時執⾏的多個 transactions，彼此不應該互相⼲擾。 每個
+        transaction 看起來就像是在⼀個沒有其他 transaction 存在的環境下獨立執⾏。
+
+        這是四個屬性裡最複雜、也最有取捨空間的⼀個。完全的隔離性代價很⾼，所以實務
+        上有不同等級的隔離，在效能和安全性之間做選擇
+
+    Durability（持久性）
+        持久性保證：⼀旦 transaction commit 成功，資料就永久保存，即使系統立刻崩潰也不會遺失。
+        這通常靠把資料寫入持久化儲存（磁碟）和維護 WAL 來實現。資料庫重啟後，可以從
+        log 重建已 commit 但尚未刷到磁碟的資料。
+
+
+隔離等級 (Isolation Levels)
+
+    Read Uncommitted
+        最低的隔離等級。Transaction 可以讀到其他尚未 commit 的 transaction 正在寫入的
+        資料。
+        這是最危險的等級：如果另⼀個 transaction 之後 rollback，你讀到的就是⼀份從未真
+        正存在過的資料。在⽣產環境幾乎不會使⽤這個等級。
+
+    Read Committed
+        Transaction 只能讀取已經 commit 的資料。這避免了 dirty read，是⼤多數資料庫
+        (包括 PostgreSQL)的預設隔離等級。
+        但它還不夠完美，同⼀個 transaction 內，你兩次讀取同⼀筆資料，可能得到不同的結
+        果（因為另⼀個 transaction 在這中間 commit 了更新）。
+
+    Repeatable Read
+        同⼀個 transaction 內，多次讀取同⼀筆資料，保證得到相同的結果。即使其他
+        transaction 在這期間更新了那筆資料，你也看不到變化。
+        MySQL InnoDB 的預設隔離等級是 Repeatable Read。
+
+    Serializable
+        最⾼的隔離等級。所有 transactions 的執⾏結果，等同於它們按照某個順序⼀個⼀個
+        執⾏的結果。
+        最安全，但代價最⾼。通常只在⾦融交易等「絕對不能有並發異常」的場景才使⽤。
+
+        
+三種並發異常:
+    Dirty Read（髒讀）
+        Transaction A 讀取了 Transaction B 尚未 commit 的資料。如果 B 之後 rollback，A
+        就讀到了⼀份「從未存在」的資料。
+
+    Non-repeatable Read（不可重複讀）
+        同⼀個 transaction 內，兩次讀取同⼀筆資料，但兩次得到不同的結果，因為另⼀個
+        transaction 在這期間 commit 了對那筆資料的更新。
+
+    Phantom Read（幻讀）
+        同⼀個 transaction 內，兩次執⾏同樣的查詢（通常是範圍查詢），但第⼆次多出了新
+        的資料⾏，因為另⼀個 transaction 在這期間 insert 了新資料。
+
+    Non-repeatable Read 和 Phantom Read 的差別：前者是同⼀筆資料被改掉了，後者
+    是新增或刪除了資料⾏，使得範圍查詢的結果集改變。
+
+
+資料庫如何實現隔離：MVCC
+    資料庫不是靠「讓每個 transaction 等前⼀個完成」來實現隔離，那樣效能太差。現代
+    資料庫（PostgreSQL、MySQL InnoDB）普遍使⽤ MVCC（Multi-Version
+    Concurrency Control，多版本並⾏控制）。
+
+    核⼼思想很簡單：對同⼀份資料保存多個版本。 讀操作看的是資料在 transaction 開始
+    時的「快照」，⽽不是最新版本，所以讀操作不需要等待寫操作完成，寫操作也不會
+    被讀操作擋住。
+
+    這讓讀寫可以並⾏，⼤幅提升了並⾏性。舊版本在沒有 transaction 需要它們之後，由
+    資料庫的垃圾回收機制清理。
+
+
+常⾒陷阱：Lost Update（更新遺失）
+    除了三種讀取異常，還有⼀個常⾒問題值得特別注意：Lost Update。
+    當兩個 transaction 同時讀取同⼀筆資料、各⾃計算新值、然後都寫回去時，後寫入的
+    transaction 會覆蓋前⼀個，讓前⼀個的更新完全消失。
+
+    解法有兩種：
+        樂觀鎖（Optimistic Locking）：在更新時帶上版本號，如果版本號不符就拒絕更新。
+        適合衝突不常發⽣的場景。
+
+        悲觀鎖（Pessimistic Locking）：讀取時就把資料鎖住，阻⽌其他 transaction 讀取
+        或修改，直到當前 transaction 完成。
+
+        悲觀鎖較安全，但降低了並⾏性，也可能引發 Deadlock（死鎖），兩個 transaction
+        互相等待對⽅釋放鎖。資料庫通常有 deadlock detection 機制，會 rollback 其中⼀個
+        transaction。
+
+        ***以的transaction，都發⽣在單⼀資料庫內。當系統拆分成微服務、資料分散在***
+           多個資料庫中，情況就複雜得多。
+
