@@ -1,0 +1,38 @@
+當系統拆分成微服務、資料分散在多個資料庫中，情況就複雜得多。
+電商系統裡，訂單服務⽤⼀個資料庫，庫存服務⽤另⼀個資料庫。建立訂單和扣庫存需要同時成功，
+但它們在不同的資料庫裡，沒有辦法⽤⼀個BEGIN/COMMIT 把它們包在⼀起。
+
+    Two-Phase Commit（2PC，兩階段提交）
+        最直接的解法是 2PC：由⼀個協調者（coordinator）來確保所有參與節點都同意commit。
+        第⼀階段（Prepare）：協調者問所有參與節點「你準備好 commit 了嗎？」每個節點
+            把資料寫好但先不 commit，回傳 Yes 或 No。
+        第⼆階段（Commit/Abort）：如果所有節點都回 Yes，協調者發送 Commit 指令；只
+            要有任何⼀個節點回 No，發送 Abort，所有節點 rollback。
+            2PC 的問題是：如果協調者在第⼆階段發出 Commit 前崩潰，部分節點可能永遠卡在
+            「已 prepare 但未 commit」的狀態，需要⼈⼯⼲預。這讓 2PC 在⾼可⽤性要求的系
+            統中難以使⽤。
+
+    Saga Pattern
+        現代微服務架構更常⽤的解法是 Saga：把⼀個分散式 transaction 拆成⼀系列⼩的、
+        有補償機制的本地 transaction。
+
+        Saga 放棄了強⼀致性，⽤「最終⼀致性」換取更好的可⽤性和容錯能⼒。這是絕⼤多
+        數微服務系統⾯對分散式 transaction 的現實選擇。
+
+        特性:        Two-Phase Commit(2PC)                   Saga Pattern                                   ***Two-Phase Commit的協調者就像強勢的第三方公證人***
+        一致性類型:   強一致性 (Strong Consistency)           最終一致性 (Eventual Consistency)
+        核心目標:     確保每一刻資料都是同步的                  確保流程「最終」會完成（或被修復）
+        資源處理:     鎖定資源 (大家都不准動，等我決定)         不鎖定資源 (大家先做，錯了再改)
+        失敗處理:     Rollback (回滾)：直接當作沒發生過         Compensating (補償)：做一個反向動作抵銷
+        適用場景：    單一公司內部的多個資料庫（如 MySQL 叢集）  微服務、串接第三方 API (Stripe, LINE Pay)、電商下單流程
+    
+
+        併發是關於「如何同時處理很多事」，而不一定要「同時做很多事」。讓系統在資源有限的情況下，看起來像是在同步運作。
+
+
+併發 (Concurrency): 是無限的：伺服器可能只有 8 核 CPU（只能並行處理 8 件事），但卻要同時服務 10,000 個用戶。
+                    這時候，你只能靠極速的「切換」（併發）來讓這 1萬個人都覺得自己被服務到了。
+                    不管是 Event Loop、Saga Pattern 還是 Database Transactions，這一切技術背後的頭號敵人與終極目標，全部都圍繞著 Concurrency（併發）。
+
+並行 (Parallelism): 雖然可以同時做很多事,但是它是有上限的：電腦 CPU 有幾個核心 (Core)，就只能真正地「並行」處理幾個任務。
+
