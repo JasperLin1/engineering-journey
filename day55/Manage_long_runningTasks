@@ -1,0 +1,37 @@
+管理長時間執⾏任務的模式（Managing Long-Running Tasks pattern）把 API 請求拆成兩個階段：
+立即確認和背景處理，⽤⼾提交繁重的任務。 web server 會立刻驗證請求。
+把⼀個 job 推進 queue（Redis / RabbitMQ），並回傳⼀個job ID，
+這整個過程在毫秒內完成。與此同時，獨立的 worker process 持續輪詢
+queue、抓取待處理的 job、執⾏真正耗時的⼯作，並在 database 裡更新 job 的狀態
+
+問題在這基本上不使用同步處理 (synchronous processing)，因為⽤⼾的瀏覽器可能就這樣等了 30 秒。
+⽤⼾體驗也很差，因為他們盯著⼀個載入中的圖⽰，完全不知道進度如何。
+***很多⽤⼾以為出了什麼問題，然後再試⼀次，製造出讓問題更嚴重的重複⼯作***
+
+解法架構通常使用核⼼概念是把接受請求和處理請求解耦
+也就是Web server 工作流程像是需驗證請求、把它加進 queue、然後回傳⼀個job ID 
+實際的文件產⽣完全在別的地⽅進⾏。
+
+主要是以⼀個獨立的 worker process 池（pool）負責真正繁重的⼯作。
+這些 worker 從共⽤的 queue 拉取 job以⾃⼰的速度處理它們，並在完成後更新job 的狀態。
+***常⽤的 queue 選項包括 Redis（搭配 Bull 或 BullMQ）、AWS SQS、RabbitMQ，
+或是在更⾼規模時使⽤ Kafka。Queue 也能看到有多少 job 在等待***
+
+
+管理長時間執⾏任務，這個⽅式解決了某些問題，但也製造了其他問題
+現在要管理 queue、worker 和 job 狀態追蹤。更多活動的元件，就意味著更多可能出問題的地⽅。
+最終⼀致性（Eventual consistency）：API 回傳時，⼯作還沒完成。⽤⼾可能在背景處理完成之前看到過時的資料。
+
+通常會遇到queue滿了怎麼辦、任務逾時與連接中斷、 任務狀態的一致性與持久化資源競爭與超載、任務失敗與重試機制 
+這些事件需要兩種核⼼技術:Message Queue and Worker Pool。
+
+以下是所有東⻄協同運作的流程：
+1. Web server 驗證請求，並在 database 裡建立⼀筆狀態為 pending 的 job 記錄
+2. Web server 把包含 job ID 的訊息推進 queue（不是完整的 job 資料）
+3. Web server 立刻把 job ID 回傳給 client
+4. Worker 從 queue 拉取訊息，從 database 抓取 job 的詳細資料
+5. Worker 把 job 狀態更新為 processing
+6. Worker 執⾏實際的⼯作
+7. Worker 儲存結果（檔案存 S3，metadata 存 database 等）
+8. Worker 把 job 狀態更新為 completed 或 failed
+
